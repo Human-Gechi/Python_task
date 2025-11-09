@@ -59,8 +59,9 @@ def insert_data():
         cursor = conn.cursor()
         logger.info("Database connection is successful")
 
-        scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-        creds = Credentials.from_service_account_file(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"), scope=scope)
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+        json_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json")
+        creds = Credentials.from_service_account_file(json_path, scopes=scopes)
 
         authorization = gspread.authorize(creds)
 
@@ -208,5 +209,6 @@ def update_user_active_status(api_key=None):
     logger.info("Database connection closed after updating user subscription_status")
 
 
-if __name__ == "__main__":
-    insert_data()
+insert_data()
+verify_email()
+update_user_active_status()

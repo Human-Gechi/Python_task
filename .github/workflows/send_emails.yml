@@ -25,10 +25,10 @@ jobs:
         run: |
           echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json
 
-      - name: Run DB insertion update verification
+      - name: Run DB insertion/update/verification
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json
-          URL: ${{ secrets.URL }}
+          URL: ${{ secrets.GOOGLE_FORM_URL }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_USER: ${{ secrets.DB_USER }}
@@ -36,9 +36,7 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          echo "Running db_conn.py========="
           python Zenquotes/db_conn.py
-          echo "db_conn.py finished running."
 
       - name: Run email sending
         env:
@@ -51,12 +49,10 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          echo "Running Wellness.p========="
           python Zenquotes/Wellness.py
-          echo "Wellness.py finished running."
 
       - name: Upload logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: workflow-logs
-          path: Zenquotes/workflow.log
+          path: Zenquotes/logs/
