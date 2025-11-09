@@ -214,6 +214,8 @@ def update_user_active_status(api_key=None):
     logger.info("Database connection closed after updating user subscription_status")
 
 
-insert_data()
-verify_email(api_key=os.getenv("API_KEY"))
-update_user_active_status()
+if __name__ == "__main__":
+
+    insert_data()
+    verify_email(api_key=os.getenv("API_KEY"))
+    update_user_active_status()

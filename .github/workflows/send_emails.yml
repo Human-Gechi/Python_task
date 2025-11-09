@@ -2,7 +2,7 @@ name: ThriveWell Email Workflow
 
 on:
   schedule:
-    - cron: '30 9 * * *'
+    - cron: '45 6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -55,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: workflow-logs
-          path: Zenquotes/logs/
+          path: email_logs.log
