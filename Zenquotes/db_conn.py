@@ -96,8 +96,10 @@ def insert_data():
     except Exception as e:
         logger.exception("Error inserting data:")
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
         logger.info("Database connection was closed after data insertion")
 
 def select_users():
