@@ -52,7 +52,7 @@ jobs:
           python Zenquotes/Wellness.py
 
       - name: Upload logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: workflow-logs
           path: Zenquotes/logs/
