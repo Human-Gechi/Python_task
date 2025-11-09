@@ -10,10 +10,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,34 +21,26 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Create Google Service Account JSON
-        shell: pwsh
-        env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      - name: Create Google service account JSON
         run: |
-          $serviceAccountPath = "$env:GITHUB_WORKSPACE/Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json"
-          $GOOGLE_SERVICE_ACCOUNT_JSON | Out-File -Encoding utf8 $serviceAccountPath
-          echo "Google service account file created at $serviceAccountPath"
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json
 
-
-      - name: Run DB insertion, update, verification
+      - name: Run DB insertion update verification
         env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json
+          URL: ${{ secrets.URL }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
           API_KEY: ${{ secrets.API_KEY }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json
-          URL: ${{ secrets.URL }}
-
         run: |
-          echo "Running db_conn.py==========="
+          echo "Running db_conn.py========="
           python Zenquotes/db_conn.py
-          echo "db_conn.py finished run"
+          echo "db_conn.py finished running."
 
-
-      - name: Run Email sending
+      - name: Run email sending
         env:
           SENDER_EMAIL: ${{ secrets.EMAIL_USER }}
           SENDER_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
@@ -61,6 +51,12 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           API_KEY: ${{ secrets.API_KEY }}
         run: |
-          echo "Running Wellness.py========="
+          echo "Running Wellness.p========="
           python Zenquotes/Wellness.py
-          echo "Wellness.py finished run"
+          echo "Wellness.py finished running."
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: workflow-logs
+          path: Zenquotes/workflow.log
