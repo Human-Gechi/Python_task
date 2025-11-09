@@ -50,6 +50,8 @@ def create_users_table():
             conn.close()
         logger.info("Database connection closed after table creation")
 def insert_data():
+    conn = None
+    cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
