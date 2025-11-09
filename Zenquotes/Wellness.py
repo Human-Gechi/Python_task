@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from db_conn import get_connection
 from datetime import datetime
 from dotenv import load_dotenv
-
+from logs import logger
 load_dotenv()
 
 url = "https://zenquotes.io/api/random"
@@ -36,7 +36,7 @@ def make_request():
             return quote
 
         except requests.exceptions.RequestException as err:
-            print(f"Attempt {attempt + 1} failed: {err}")
+            logger.info(f"Attempt {attempt + 1} failed: {err}")
             if attempt < max_retries - 1:
                 time.sleep(2)
                 continue
@@ -56,7 +56,7 @@ def daily_send_email(server, port, sender_email, sender_password):
         subscribers = cursor.fetchall()
 
         if not subscribers:
-            print("No active subscribers found for daily emails")
+            logger.info("No active subscribers found for daily emails")
             return
 
 
@@ -95,7 +95,7 @@ def daily_send_email(server, port, sender_email, sender_password):
                 except Exception as e:
                     print(f"Failed to send to {recipient_email}: {e}")
     except Exception as e:
-        print(f"Error during email sending process: {e}")
+        logger.info(f"Error during email sending process: {e}")
     finally:
         if cursor:
             cursor.close()
@@ -117,7 +117,7 @@ def weekly_send_email(server, port, sender_email, sender_password):
         subscribers = cursor.fetchall()
 
         if not subscribers:
-            print("No active subscribers found for daily emails")
+            logger.info("No active subscribers found for daily emails")
             return
 
 
@@ -155,7 +155,7 @@ def weekly_send_email(server, port, sender_email, sender_password):
                 except Exception as e:
                     print(f"Failed to send to {recipient_email}: {e}")
     except Exception as e:
-        print(f"Error during email sending process: {e}")
+        logger.info(f"Error during email sending process: {e}")
     finally:
         if cursor:
             cursor.close()
