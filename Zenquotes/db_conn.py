@@ -210,5 +210,5 @@ def update_user_active_status(api_key=None):
 
 
 insert_data()
-verify_email()
+verify_email(api_key=os.getenv("API_KEY"))
 update_user_active_status()
