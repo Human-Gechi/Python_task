@@ -20,6 +20,8 @@ def get_connection():
     )
 
 def create_users_table():
+    conn = None
+    cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -60,7 +62,6 @@ def insert_data():
         scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         creds = Credentials.from_service_account_file(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"), scope=scope)
 
-
         authorization = gspread.authorize(creds)
 
         sheet = authorization.open_by_url(os.getenv("URL"))
@@ -71,24 +72,28 @@ def insert_data():
         rows = data[1:]
 
         for row in rows:
-            created_at, first_name, last_name, email_address, emailfrequency = row
-            cursor.execute("SELECT * FROM users WHERE email_address = %s;", (email_address,))
-            exists = cursor.fetchall()
+            if len(row) < 5:
+                logger.warning(f"Skipping malformed row (expected 5 columns): {row}")
+                continue
+            created_at, first_name, last_name, email_address, emailfrequency = row[:5]
+            cursor.execute("SELECT 1 FROM users WHERE email_address = %s;", (email_address,))
+            exists = cursor.fetchone()
 
             if not exists:
                 cursor.execute("""
                     INSERT INTO users (created_at, first_name, last_name, email_address, email_frequency)
                     VALUES (%s, %s, %s, %s, %s)
                 """, (created_at, first_name, last_name, email_address, emailfrequency))
+
                 if "@" in email_address:
-                    name, domain = email_address.split("@")
-                    email_address = f"{name[:5]}***@{domain}"
-                    logger.info(f"New user added: {email_address}")
+                    name, domain = email_address.split("@", 1)
+                    masked = f"{name[:5]}***@{domain}"
+                    logger.info(f"New user added: {masked}")
             else:
                 if "@" in email_address:
-                    name, domain = email_address.split("@")
-                    email_address = f"{name[:5]}***@{domain}"
-                    logger.info(f"User already exists: {email_address}")
+                    name, domain = email_address.split("@", 1)
+                    masked = f"{name[:5]}***@{domain}"
+                    logger.info(f"User already exists: {masked}")
                 else:
                     logger.info(f"User already exists: {email_address}")
 
@@ -106,6 +111,8 @@ def insert_data():
 
 def select_users():
     all_users = []
+    conn = None
+    cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -129,6 +136,8 @@ def select_users():
 
 def select_user_emails():
     all_emails = []
+    conn = None
+    cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -192,11 +201,12 @@ def update_user_active_status(api_key=None):
     except Exception as e:
         logger.exception(f"Database error while updating stats: {e}")
     finally:
-       if cursor:
-           cursor.close()
-       if conn:
-           conn.close()
-    logger.info("Database connection closed after updating user suscription_status")
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+    logger.info("Database connection closed after updating user subscription_status")
 
 
-insert_data()
+if __name__ == "__main__":
+    insert_data()
