@@ -28,7 +28,7 @@ jobs:
       - name: Run DB insertion/update/verification
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json
-          URL: ${{ secrets.GOOGLE_FORM_URL }}
+          URL: ${{ secrets.URL }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_USER: ${{ secrets.DB_USER }}
@@ -40,8 +40,8 @@ jobs:
 
       - name: Run email sending
         env:
-          SENDER_EMAIL: ${{ secrets.EMAIL_USER }}
-          SENDER_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_USER: ${{ secrets.DB_USER }}
