@@ -149,7 +149,6 @@ def select_user_emails():
         for email_tuple in emails:
             if email_tuple[0]:
                 all_emails.append(email_tuple[0].strip())
-        return all_emails
     except Exception as e:
         logger.error(f"Error selecting user emails: {e}")
     finally:
@@ -158,12 +157,18 @@ def select_user_emails():
         if conn:
             conn.close()
         logger.info("Database connection closed after selecting user emails")
+    return all_emails
 
 
 def verify_email(api_key):
     hunter = PyHunter(api_key)
     results = []
-    for email in select_user_emails():
+    emails = select_user_emails()
+    if not emails:
+        logger.warning("No emails found to verify")
+        return results
+
+    for email in emails:
         try:
             email_verify = hunter.email_verifier(email)
             status = email_verify.get('status') if isinstance(email_verify, dict) else None
