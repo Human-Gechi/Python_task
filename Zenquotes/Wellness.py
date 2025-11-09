@@ -11,24 +11,35 @@ from dotenv import load_dotenv
 load_dotenv()
 
 url = "https://zenquotes.io/api/random"
+recent_quotes = set()
+max_quotes = 50
+max_retries = 3
+
 def make_request():
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        return f"{data[0]['q']} - {data[0]['a']}"
-    except requests.exceptions.HTTPError as errh:
-        print("An error occurred, try again later")
-        return "Life is what happens while you're busy making other plans. - John Lennon"
-    except requests.exceptions.ConnectionError as errc:
-        print(f"Internet Connection is needed!")
-        return "The best preparation for tomorrow is doing your best today. - H. Jackson Brown Jr."
-    except requests.exceptions.Timeout as errt:
-        print(f"Timeout error: {errt}")
-        return "Patience is not the ability to wait, but the ability to keep a good attitude while waiting. - Joyce Meyer"
-    except requests.exceptions.RequestException as err:
-        print(f"An error occurred: {err}")
-        return "Every day may not be good, but there's something good in every day. - Unknown"
+    global recent_quotes
+
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            quote = f"{data[0]['q']} - {data[0]['a']}"
+
+            if quote in recent_quotes and attempt < max_retries - 1:
+                time.sleep(1)
+                continue
+            recent_quotes.add(quote)
+
+            if len(recent_quotes) > max_quotes:
+                recent_quotes = set(list(recent_quotes)[-max_quotes:])
+
+            return quote
+
+        except requests.exceptions.RequestException as err:
+            print(f"Attempt {attempt + 1} failed: {err}")
+            if attempt < max_retries - 1:
+                time.sleep(2)
+                continue
 
 def daily_send_email(server, port, sender_email, sender_password):
     conn = get_connection()
