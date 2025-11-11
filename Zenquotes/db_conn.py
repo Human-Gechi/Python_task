@@ -1,3 +1,4 @@
+#Importing necessary libraties
 from dotenv import load_dotenv
 import os
 import psycopg2
@@ -8,7 +9,7 @@ from pyhunter import PyHunter
 
 
 load_dotenv()
-
+#Funtion to make a postgres connection
 def get_connection():
     return psycopg2.connect(
         host=os.getenv("DB_HOST"),
@@ -19,14 +20,21 @@ def get_connection():
         sslmode="require"
     )
 
+
 def create_users_table():
+    """
+    Funtion to create table users in the postgres db hosted in aiven
+    Parameters :
+        None
+    """
     conn = None
     cursor = None
-    try:
+    try:#Making a connection to the db by calling the get_connection function
         conn = get_connection()
         cursor = conn.cursor()
-        logger.info("Database connection is successful")
+        logger.info("Database connection is successful") #Log meaasage
 
+        #Dynamic sql for table creation
         create_table_query = """
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -38,49 +46,49 @@ def create_users_table():
             subscription_status TEXT CHECK (subscription_status IN ('Active', 'Inactive')) DEFAULT 'Active'
         );
         """
-
+        #executing query
         cursor.execute(create_table_query)
         conn.commit()
-        logger.info("Table 'users' has been created successfully")
-    except Exception as e:
+        logger.info("Table 'users' has been created successfully") #Log meassgae
+    except Exception as e: #Catching exception if any
         logger.exception(f"Error creating table: {e}")
 
-    finally:
+    finally: #final blck of exception
         if cursor:
-            cursor.close()
+            cursor.close() #closing cursor
         if conn:
-            conn.close()
+            conn.close() #closing connection to the db
         logger.info("Database connection closed after table creation")
-def insert_data():
+def insert_data(): #Inserting data into the database
     conn = None
     cursor = None
-    try:
+    try: #Getting postgres connection
         conn = get_connection()
         cursor = conn.cursor()
         logger.info("Database connection is successful")
-
+        #Connection to google sheets having user info
         scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-        json_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json")
+        json_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json") #service_Account credentials
         creds = Credentials.from_service_account_file(json_path, scopes=scopes)
 
         authorization = gspread.authorize(creds)
 
-        sheet = authorization.open_by_url(os.getenv("URL"))
-        worksheet = sheet.sheet1
-        data = worksheet.get_all_values()
-        logger.info("Connection to Google Sheets was successful")
+        sheet = authorization.open_by_url(os.getenv("URL"))#opening the url of the form
+        worksheet = sheet.sheet1 #Accessing sheet on of the form
+        data = worksheet.get_all_values() #Getting all rows from the sheet
+        logger.info("Connection to Google Sheets was successful") #log message for successful sheets connection
 
-        rows = data[1:]
+        rows = data[1:] #Accessing data from the furst row
 
-        for row in rows:
-            if len(row) < 5:
-                logger.warning(f"Skipping malformed row (expected 5 columns): {row}")
+        for row in rows: #looping through each row
+            if len(row) < 5: #column number check
+                logger.warning(f"Skipping malformed row (expected 5 columns): {row}") #Log message
                 continue
             created_at, first_name, last_name, email_address, emailfrequency = row[:5]
             cursor.execute("SELECT 1 FROM users WHERE email_address = %s;", (email_address,))
             exists = cursor.fetchone()
 
-            if not exists:
+            if not exists:#tabke insertion
                 cursor.execute("""
                     INSERT INTO users (created_at, first_name, last_name, email_address, email_frequency)
                     VALUES (%s, %s, %s, %s, %s)
