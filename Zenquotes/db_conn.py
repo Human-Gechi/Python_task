@@ -88,7 +88,7 @@ def insert_data(): #Inserting data into the database
             cursor.execute("SELECT 1 FROM users WHERE email_address = %s;", (email_address,))
             exists = cursor.fetchone()
 
-            if not exists:#tabke insertion
+            if not exists:#table insertion
                 cursor.execute("""
                     INSERT INTO users (created_at, first_name, last_name, email_address, email_frequency)
                     VALUES (%s, %s, %s, %s, %s)
