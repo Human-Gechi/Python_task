@@ -124,7 +124,7 @@ def daily_send_email(server, port, sender_email, sender_password):
                 email_content = f"""
                 <html>
                 <body style="font-family: Arial, sans-serif; color:333333;">
-                    <h2>✨ Hello <span style="color:#1A3E5D;">{first_name} 😊</span>!</h2>
+                    <h2>✨ Hello <span style="color:#1A3E5D;">{first_name} 😊</span></h2>
                     <p>Here's your inspirational quote of the day:</p>
                     <blockquote style="border-left: 4px solid #919191; padding-left: 10px;">
                         {quote}
@@ -200,7 +200,7 @@ def weekly_send_email(server, port, sender_email, sender_password):
                 email_content = f"""
                    <html>
                     <body style="font-family: Arial, sans-serif; color:#333333;">
-                        <h2>✨ Hello <span style="color:#1A3E5D;">{first_name} 😊</span>!</h2>
+                        <h2>✨ Hello <span style="color:#1A3E5D;">{first_name} 😊</span></h2>
                         <p>Here's your inspirational quote of the week:</p>
                         <blockquote style="border-left: 4px solid #919191; padding-left: 10px;">
                             {quote}

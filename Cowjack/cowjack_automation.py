@@ -3,7 +3,7 @@ from jira import JIRA
 import supabase
 import os
 from dotenv import load_dotenv
-
+from logs import logger
 load_dotenv()
 #Making a connection to my Jira workspace
 jira_connection = JIRA(
@@ -13,6 +13,9 @@ jira_connection = JIRA(
 try:
     #Successful connection
     user = jira_connection.current_user()
-    print(f"Connection successful! Logged in as: {user}")
+    logger.info(f"Connection successful! Logged in as: {user}")
 except Exception as e:
-    print("Connection failed:", e)
+    logger.info("Connection failed:", e)
+
+def supabase_conn():
+    pass
