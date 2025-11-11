@@ -167,59 +167,107 @@ def select_user_emails():
         logger.info("Database connection closed after selecting user emails")
     return all_emails
 
+def select_unverified_emails():
 
-def verify_email(api_key):
-    hunter = PyHunter(api_key)
-    results = []
-    emails = select_user_emails()
-    if not emails:
-        logger.warning("No emails found to verify")
-        return results
-
-    for email in emails:
-        try:
-            email_verify = hunter.email_verifier(email)
-            status = email_verify.get('status') if isinstance(email_verify, dict) else None
-            results.append((email, status))
-        except Exception as e:
-            logger.exception(f"Error verifying {email}: {e}")
-            results.append((email, None))
-            continue
-    return results
-
-def update_user_active_status(api_key=None):
-    if api_key is None:
-        api_key = os.getenv("API_KEY")
-    verifications = verify_email(api_key)
-    if not verifications:
-        logger.info("No emails to verify.")
-        return
+    unverified_emails = []
+    conn = None
+    cursor = None
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        for email, status in verifications:
-            if status == "invalid" or status is None:
-                try:
-                    cursor.execute(
-                        """
-                        UPDATE users
-                        SET subscription_status = 'Inactive'
-                        WHERE email_address = %s;
-                        """,
-                        (email,)
-                    )
-                    conn.commit()
-                    logger.info(f"Updated subscription_status to Inactive for {email}")
-                except Exception as e:
-                    logger.exception(f"Error updating status for {email}: {e}")
+        logger.info("Database connection for selecting unverified emails is successful")
+
+        cursor.execute("SELECT email_address FROM users WHERE is_verified = FALSE;")
+        emails = cursor.fetchall()
+        for email_tuple in emails:
+            if email_tuple[0]:
+                unverified_emails.append(email_tuple[0])
+
     except Exception as e:
-        logger.exception(f"Database error while updating stats: {e}")
+        logger.error(f"Error selecting unverified emails: {e}")
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
-    logger.info("Database connection closed after updating user subscription_status")
+        logger.info("Database connection closed after selecting unverified emails")
+    return unverified_emails
+
+
+def verify_email(api_key):
+    """Verify only NEW/unverified emails"""
+    hunter = PyHunter(api_key)
+    results = []
+    emails = select_unverified_emails()
+    if not emails:
+        logger.warning("No unverified emails found to verify")
+        return results
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        for email in emails:
+            try:
+                email_verify = hunter.email_verifier(email)
+                status = email_verify.get('status') if isinstance(email_verify, dict) else None
+                results.append((email, status))
+
+                # Mark email as verified in the database
+                cursor.execute("""
+                    UPDATE users 
+                    SET is_verified = TRUE, email_verification_date= CURRENT_TIMESTAMP 
+                    WHERE email_address = %s
+                """, (email,))
+                conn.commit()
+                logger.info(f"Email {email} marked as verified with status: {status}")
+
+            except Exception as e:
+                logger.exception(f"Error verifying {email}: {e}")
+                results.append((email, None))
+                continue
+
+    except Exception as e:
+        logger.error(f"Database error in verify_email: {e}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+    return results
+
+def update_user_active_status(email, verification_status):
+  
+    accepted_good_statuses = ('valid')
+    is_verified = verification_status in accepted_good_statuses
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE users
+            SET is_email_verified = %s,
+                email_verified_at = CASE WHEN %s THEN CURRENT_TIMESTAMP ELSE email_verified_at END,
+                subscription_status = CASE WHEN %s THEN 'Active' ELSE subscription_status END
+            WHERE email_address = %s
+        """, (is_verified, is_verified, is_verified, email))
+        conn.commit()
+        logger.info("Updated verification for %s -> verified=%s status=%s", email, is_verified, verification_status)
+    except Exception as e:
+        logger.exception("Failed to update user status for %s: %s", email, e)
+        if conn:
+            conn.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 if __name__ == "__main__":

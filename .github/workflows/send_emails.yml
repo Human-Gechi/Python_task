@@ -2,7 +2,7 @@ name: ThriveWell Email Workflow
 
 on:
   schedule:
-    - cron: '00 7 * * *'
+    - cron: '30 7 * * *'
   workflow_dispatch:
 
 jobs:
