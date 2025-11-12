@@ -140,8 +140,10 @@ def daily_send_email(server, port, sender_email, sender_password):
                     time.sleep(5) #Timing delay before sending an email
                     smtp.sendmail(sender_email, recipient_email, msg.as_string()) #Sending email to receipient
                     print(f"Email successfully sent=======") #Output message for successfully sent emails
+                    logger.info(f"Email sent successfully to {recipient_email[:6]}****@gmail.com")
                 except Exception as e: #Except any errors
                     print(f"Failed to send email=====") #Output message for failures
+                    logger.info(f"Failed to send email to {recipient_email[:6]}****@gmail.com")
     except Exception as e:
         logger.info(f"Error during email sending process: {e}")
     finally: #Final block close the connection to db
@@ -216,9 +218,11 @@ def weekly_send_email(server, port, sender_email, sender_password):
                 try:
                     time.sleep(5) #Timing delay before sending an email
                     smtp.sendmail(sender_email, recipient_email, msg.as_string())  #Sending email to receipient
-                    print(f"Email successfully sent========") #Output message for successfully quotes sent to the users
+                    print(f"Email successfully sent========")#Output message for successfully quotes sent to the users
+                    logger.info(f"Email sent successfully to {recipient_email[:6]}****@gmail.com")
                 except Exception as e:
                     print(f"Failed to send email: {e}")
+                    logger.info(f"Failed to send email to {recipient_email[:6]}****@gmail.com")
     except Exception as e:
         logger.info(f"Error during email sending process: {e}")
     finally:
@@ -226,7 +230,7 @@ def weekly_send_email(server, port, sender_email, sender_password):
             cursor.close()
         if conn:
             conn.close()
-#Main funtion or running the functions
+
 def main():
 
     today = datetime.today() #Fetching today's date

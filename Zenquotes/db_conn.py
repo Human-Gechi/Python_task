@@ -68,7 +68,7 @@ def insert_data(): #Inserting data into the database
         logger.info("Database connection is successful")
         #Connection to google sheets having user info
         scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-        json_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json") #service_Account credentials
+        json_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", 'Zenquotes/crested-pursuit-457714-c8-f5a68d29f980.json') #service_Account credentials
         creds = Credentials.from_service_account_file(json_path, scopes=scopes)
 
         authorization = gspread.authorize(creds)
@@ -194,7 +194,12 @@ def select_unverified_emails():#selecting unverified emails
     return unverified_emails #Retrun the list of unverified emails
 
 def update_user_active_status(email, verification_status):
-
+    """
+        Function for updating user_active status or subscription status
+    Parameter:
+        email: Email addresses of the users
+        verification_status: Subscription_status of users; 'Active' or 'Inactive'
+    """
     accepted_good_status = ('valid') #Email validity status for the Pyhunter email verifier
     is_good = verification_status in accepted_good_status #Check for verification status
 
@@ -212,63 +217,71 @@ def update_user_active_status(email, verification_status):
                     subscription_status = CASE WHEN subscription_status IS NULL OR subscription_status = 'Inactive' THEN 'Active' ELSE subscription_status END
                 WHERE email_address = %s
             """, (email,)) #Verify unverified email_addresses
-        else:
+        else: #If not verifiable i.e status != 'valid' SET is_verified = Falase
             cursor.execute("""
                 UPDATE users
                 SET
                     is_verified = FALSE
                 WHERE email_address = %s
             """, (email,))
-        conn.commit()
-        logger.info("DB updated for %s -> verified=%s status=%s", email, is_good, verification_status)
+        conn.commit() #Commit changes to the db
+        logger.info("DB updated for %s -> verified=%s status=%s", email, is_good, verification_status) #Log info for successful updates
     except Exception as e:
-        logger.exception("Failed to update verification for %s: %s", email, e)
+        logger.exception("Failed to update verification for %s: %s", email, e) #Except something happens Log message for catching the error
         if conn:
-            conn.rollback()
+            conn.rollback() #Do not commit ti db if there be an error
     finally:
         if cursor:
-            cursor.close()
+            cursor.close() #Finally, close cursor
         if conn:
-            conn.close()
+            conn.close() #Finally,close connection
 
 
-def verify_email(api_key):
-    hunter = PyHunter(api_key)
-    results = []
+def verify_email(api_key): #Email verification
+    """
+    A Function to verify email addressed of users
 
-    emails = select_unverified_emails()
-    if not emails:
-        logger.info("No unverified emails found to verify")
-        return results
+    Parameter:
+        api_key : API_KEY of Hunter.io[Api service used for email verification]
 
-    gathered = []
-    for email in emails:
+    """
+    hunter = PyHunter(api_key) #Calling the PyHunter function with the api_key as a parameter
+    results = [] #List to hold the list of verified emails
+
+    emails = select_unverified_emails() #Calling the unverified emails function
+    if not emails: # If no email is found
+        logger.info("No unverified emails found to verify") #Log message
+        return results #return th list of verified emails
+
+    gathered = [] #List of email and their status
+    for email in emails: #Looping through a list of unverified emails
         try:
-            verification = hunter.email_verifier(email)
+            verification = hunter.email_verifier(email) #The .email_verifier method in pyhunter for verifying emails
 
-            try:
-                status = verification.get('status')
-            except Exception:
-                status = None
-            gathered.append((email, status))
-        except Exception as e:
-            logger.exception("Verification API error for %s: %s", email, e)
-            gathered.append((email, None))
+            try: #Try except block for email verification
+                status = verification.get('status') #Getting email satus
+            except Exception: #Except an error occured
+                status = None #Return no status
+            gathered.append((email, status)) #Append the status of the emails
+        except Exception as e: #Except an error occured then an error occured
+            logger.exception("Verification API error for %s: %s", email, e) #API verification
+            gathered.append((email, None)) #Append the status or None if there be an error
 
-    for email, status in gathered:
+    for email, status in gathered: #Looping through the list of emails and their status
         try:
-            if status is None:
-                update_user_active_status(email, 'invalid')
+            if status is None: #if status is None;
+                update_user_active_status(email, 'invalid') #user active status is 'invalid'
             else:
-                update_user_active_status(email, status)
-            results.append((email, status))
-        except Exception as e:
-            logger.exception("Failed to update DB after verification for %s: %s", email, e)
-            results.append((email, status))
+                update_user_active_status(email, status) #Else append email and the status
+            results.append((email, status)) #Final email and status is appended to the result of verified emails
+        except Exception as e: #Error exception for erros is therebe errors in uodating user emails
+            logger.exception("Failed to update DB after verification for %s: %s", email, e) #Log message if the email wasn't verified
+            results.append((email, status)) #
 
-    return results
+    return results #return the list of emails and their status
+
 
 if __name__ == "__main__":
-
-    insert_data()
-    verify_email(api_key=os.getenv("API_KEY"))
+    #Running the function
+    insert_data() #insert data
+    verify_email(api_key=os.getenv("API_KEY"))# verify emails
