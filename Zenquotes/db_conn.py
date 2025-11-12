@@ -85,121 +85,125 @@ def insert_data(): #Inserting data into the database
                 logger.warning(f"Skipping malformed row (expected 5 columns): {row}") #Log message
                 continue
             created_at, first_name, last_name, email_address, emailfrequency = row[:5]
-            cursor.execute("SELECT 1 FROM users WHERE email_address = %s;", (email_address,))
+            cursor.execute("SELECT 1 FROM users WHERE email_address = %s;", (email_address,)) #Checking if some email_addresses exist
             exists = cursor.fetchone()
 
-            if not exists:#table insertion
+            if not exists:#if they don;t exist in db :insert data
                 cursor.execute("""
                     INSERT INTO users (created_at, first_name, last_name, email_address, email_frequency)
                     VALUES (%s, %s, %s, %s, %s)
                 """, (created_at, first_name, last_name, email_address, emailfrequency))
+                #Message notification if new users were added
 
                 if "@" in email_address:
                     name, domain = email_address.split("@", 1)
                     masked = f"{name[:5]}***@{domain}"
                     logger.info(f"New user added: {masked}")
             else:
+                #Log info if the emails addresses are already existing
                 if "@" in email_address:
                     name, domain = email_address.split("@", 1)
                     masked = f"{name[:5]}***@{domain}"
                     logger.info(f"User already exists: {masked}")
-                else:
+                else: #elif it has not @symbol but the record was filed with something indicate
                     logger.info(f"User already exists: {email_address}")
 
-        conn.commit()
-        logger.info("Data insertion completed successfully.")
+        conn.commit() #commiting tranasactions
+        logger.info("Data insertion completed successfully.") #logger message
 
     except Exception as e:
-        logger.exception("Error inserting data:")
+        logger.exception("Error inserting data:") #Error exceptions
     finally:
         if cursor:
-            cursor.close()
+            cursor.close() #close the cursor
         if conn:
-            conn.close()
+            conn.close() #close the connection
         logger.info("Database connection was closed after data insertion")
 
-def select_users():
-    all_users = []
+def select_users(): #Select users
+    all_users = [] #List to hold all users
     conn = None
     cursor = None
-    try:
+    try: #Making a connection to Postgres db
         conn = get_connection()
         cursor = conn.cursor()
+        #Log message for successful database connection
         logger.info("Database connection for selecting users is successful")
 
+        #Selecting first_name of users
         cursor.execute("SELECT first_name FROM users;")
-        users = cursor.fetchall()
-        for user in users:
-            if user[0]:
-                all_users.append(user[0].strip())
-        return all_users
+        users = cursor.fetchall() #Fetching all selected names
+        for user in users: #looping throught the tuple of users
+            if user[0]: #f a user is located
+                all_users.append(user[0].strip())#append to the list of all users stripping any backspaces
+        return all_users #retrun the list of users
 
-    except Exception as e:
+    except Exception as e: #Error messgae if there be an errors
         logger.error(f"An error occurred when selecting users from the database: {e}")
     finally:
         if cursor:
-            cursor.close()
+            cursor.close() #close cursor
         if conn:
-            conn.close()
-        logger.info("Database connection closed after selecting users")
+            conn.close() #close connection
+        logger.info("Database connection closed after selecting users") #Log message for successful db closure
 
-def select_user_emails():
-    all_emails = []
+def select_user_emails():#Select users
+    all_emails = [] #List to hold all email addresses
     conn = None
     cursor = None
-    try:
-        conn = get_connection()
+    try: #make a connection to the db
+        conn = get_connection() #get a connection
         cursor = conn.cursor()
-        logger.info("Database connection for selecting email addresses of users is successful")
+        logger.info("Database connection for selecting email addresses of users is successful") #Log message for successful db connection
 
-        cursor.execute("SELECT email_address FROM users;")
-        emails = cursor.fetchall()
-        for email_tuple in emails:
+        cursor.execute("SELECT email_address FROM users;") #Selecting email_addresses from the table
+        emails = cursor.fetchall() #fetching all selected users
+        for email_tuple in emails: #looping through the tuple of emails
             if email_tuple[0]:
-                all_emails.append(email_tuple[0].strip())
+                all_emails.append(email_tuple[0].strip()) #Appending to the list of emails and stripping for backspaces
     except Exception as e:
-        logger.error(f"Error selecting user emails: {e}")
+        logger.error(f"Error selecting user emails: {e}") #Error message if email selection was unsuccessful
     finally:
         if cursor:
-            cursor.close()
+            cursor.close()#Closing the cursor
         if conn:
-            conn.close()
-        logger.info("Database connection closed after selecting user emails")
+            conn.close() #closing the connection
+        logger.info("Database connection closed after selecting user emails") #db connection closure
     return all_emails
 
-def select_unverified_emails():
+def select_unverified_emails():#selecting unverified emails
     unverified_emails = []
     conn = None
     cursor = None
-    try:
+    try:#Making a conneciton to the db
         conn = get_connection()
         cursor = conn.cursor()
-        logger.info("Selecting unverified emails")
-        cursor.execute("SELECT email_address FROM users WHERE COALESCE(is_verified, FALSE) = FALSE;")
-        rows = cursor.fetchall()
-        for r in rows:
+        logger.info("Selecting unverified emails") #Log message indicating the start of selecting unverified emails
+        cursor.execute("SELECT email_address FROM users WHERE COALESCE(is_verified, FALSE) = FALSE;") #Slecting emails where is_verified is false
+        rows = cursor.fetchall() #Fetching all emails in that category
+        for r in rows: #looping through the rows of unverified emails
             if r and r[0]:
-                unverified_emails.append(r[0])
+                unverified_emails.append(r[0]) #Appending to the list of emails
     except Exception as e:
-        logger.exception("Error selecting unverified emails: %s", e)
+        logger.exception("Error selecting unverified emails: %s", e) #Error message when selecting a particular email
     finally:
         if cursor:
-            cursor.close()
+            cursor.close() #close cursor
         if conn:
-            conn.close()
-    return unverified_emails
-
+            conn.close() #close connection
+    return unverified_emails #Retrun the list of unverified emails
 
 def update_user_active_status(email, verification_status):
-    accepted_good_statuses = ('valid')
-    is_good = verification_status in accepted_good_statuses
+
+    accepted_good_status = ('valid') #Email validity status for the Pyhunter email verifier
+    is_good = verification_status in accepted_good_status #Check for verification status
 
     conn = None
     cursor = None
     try:
-        conn = get_connection()
+        conn = get_connection()#get db connection
         cursor = conn.cursor()
-        if is_good:
+        if is_good: #if the email_satus is in is_good which is in accepetd_good_status
             cursor.execute("""
                 UPDATE users
                 SET
@@ -207,7 +211,7 @@ def update_user_active_status(email, verification_status):
                     email_verification_date = CURRENT_TIMESTAMP,
                     subscription_status = CASE WHEN subscription_status IS NULL OR subscription_status = 'Inactive' THEN 'Active' ELSE subscription_status END
                 WHERE email_address = %s
-            """, (email,))
+            """, (email,)) #Verify unverified email_addresses
         else:
             cursor.execute("""
                 UPDATE users
