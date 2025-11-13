@@ -61,11 +61,11 @@ class JiraAutomation:
         """Initializing database and Jira connections"""
         # PostgreSQL Configuration
         self.db_config = {
-            'host': os.getenv('DB_HOST', 'aws-1-eu-west-2.pooler.supabase.com'),
-            'port': os.getenv('DB_PORT', '6543'),
-            'database': os.getenv('DB_NAME', 'postgres'),
-            'user': os.getenv('DB_USER', 'postgres.tykuknkebjhzenngzujf'),
-            'password': os.getenv('DB_PASSWORD', 'cowjacketdec')
+            'host': os.getenv('HOST'),
+            'port': os.getenv('PORT', '6543'),
+            'database': os.getenv('DBNAME'),
+            'user': os.getenv('USERNAME'),
+            'password': os.getenv('DBPASSWORD')
         }
 
         # Jira SETUP
