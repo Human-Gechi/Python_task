@@ -13,5 +13,5 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
-#Assignign variable logger to the log file
+#Assign variable logger to the log file
 logger = logging.getLogger(__name__)
