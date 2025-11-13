@@ -65,14 +65,14 @@ Performed analysis and answered key questions:
 5. **Listings never reviewed**
    - Counted listings with `number_of_reviews = 0`.
 
-6. 
+6.
 
 ---
 
 ## Project Structure
-- Airbnb_Paris_Analysis/
+- Airbnb_deep_dive/
   - listings.csv              #Dataset for London dataset
-  - Airbnb_Paris_Analysis.ipynb  # Main Jupyter notebook with cleaning, enrichment, and analysis
+  - London_listings.ipynb     # Main Jupyter notebook with cleaning, enrichment, and analysis
   - README.md                 # Project documentation
 
 
