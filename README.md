@@ -12,7 +12,7 @@ Automates sending motivational quotes to subscribed users. Fetches daily quotes 
 ---
 
 ## Project 2: Airbnb Data Deep Dive – Python + Pandas
-Analyzes Paris Airbnb listings to uncover pricing patterns, availability trends, and host concentration. Cleans and enriches data, performs aggregation, and generates key insights.
+Analyzes London Airbnb listings to uncover pricing patterns, availability trends, and host concentration. Cleans and enriches data, performs aggregation, and generates key insights.
 
 **Folder:** [Airbnb_Analysis](./Airbnb_deep_dive)
 
