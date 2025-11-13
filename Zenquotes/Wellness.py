@@ -41,7 +41,7 @@ def make_request():
             response = requests.get(url, timeout=10) #Making a request to the url and setting a timeout to 10 in cases of internet connectivity issues
             response.raise_for_status() # Raising Http codes, 200 : if OK etc
             data = response.json() #Parsing response to a json object
-            quote = f"{data[0]['q']} - {data[0]['a']}" #Quote/Response -> Quote -
+            quote = f"{data[0]['q']} - {data[0]['a']}" #Quote/Response -> Quote - Author
 
             #if statement for handling repetition of quotes
             if quote in recent_quotes: #If statement for checking recent quotes

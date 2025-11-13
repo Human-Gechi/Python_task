@@ -53,7 +53,7 @@ def create_users_table():
     except Exception as e: #Catching exception if any
         logger.exception(f"Error creating table: {e}")
 
-    finally: #final blck of exception
+    finally: #final block of exception
         if cursor:
             cursor.close() #closing cursor
         if conn:
@@ -84,7 +84,7 @@ def insert_data(): #Inserting data into the database
             if len(row) < 5: #column number check
                 logger.warning(f"Skipping malformed row (expected 5 columns): {row}") #Log message
                 continue
-            created_at, first_name, last_name, email_address, emailfrequency = row[:5]
+            created_at, first_name, last_name, email_address, email_frequency = row[:5]
             cursor.execute("SELECT 1 FROM users WHERE email_address = %s;", (email_address,)) #Checking if some email_addresses exist
             exists = cursor.fetchone()
 
@@ -92,7 +92,7 @@ def insert_data(): #Inserting data into the database
                 cursor.execute("""
                     INSERT INTO users (created_at, first_name, last_name, email_address, email_frequency)
                     VALUES (%s, %s, %s, %s, %s)
-                """, (created_at, first_name, last_name, email_address, emailfrequency))
+                """, (created_at, first_name, last_name, email_address, email_frequency))
                 #Message notification if new users were added
 
                 if "@" in email_address:
