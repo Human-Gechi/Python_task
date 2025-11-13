@@ -40,10 +40,11 @@ The system handles:
    - Logs email delivery status per user.
 
 4. **Logging & Monitoring**
-   - Logs events to files in `logs/`:
+   - Logs events to files in the parent directory:
      - Quote fetched
-     - Emails sent (user, timestamp)
-     - Failures and retry attempts
+     - Emails sent
+     - Github actions artifacts are generated after each run
+     - Github actions failure email notifications if actions did not run
    - Sends summary email to admin daily with stats.
 
 ---
