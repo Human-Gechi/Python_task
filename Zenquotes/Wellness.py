@@ -139,7 +139,7 @@ def daily_send_email(server, port, sender_email, sender_password):
                 try:
                     time.sleep(5) #Timing delay before sending an email
                     smtp.sendmail(sender_email, recipient_email, msg.as_string()) #Sending email to receipient
-                    print(f"Email successfully sent=======") #Output message for successfully sent emails
+                    print(f"Email successfully sent to a daily user") #Output message for successfully sent emails
                     logger.info(f"Email sent successfully to {recipient_email[:6]}****@gmail.com")
                 except Exception as e: #Except any errors
                     print(f"Failed to send email=====") #Output message for failures
@@ -218,7 +218,7 @@ def weekly_send_email(server, port, sender_email, sender_password):
                 try:
                     time.sleep(5) #Timing delay before sending an email
                     smtp.sendmail(sender_email, recipient_email, msg.as_string())  #Sending email to receipient
-                    print(f"Email successfully sent========")#Output message for successfully quotes sent to the users
+                    print(f"Email successfully sent to a weekly user")#Output message for successfully quotes sent to the users
                     logger.info(f"Email sent successfully to {recipient_email[:6]}****@gmail.com")
                 except Exception as e:
                     print(f"Failed to send email: {e}")
