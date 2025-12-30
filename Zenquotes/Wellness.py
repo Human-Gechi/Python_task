@@ -129,6 +129,7 @@ def daily_send_email(server, port, sender_email, sender_password):
                     <blockquote style="border-left: 4px solid #919191; padding-left: 10px;">
                         {quote}
                     </blockquote>
+                    <p>It's Day 365/365.<br> You made it to the last day of the year.<br> Happy for you , Yayy! 🥳🥳🥳 </p>
                     <p>Stay Cheesed Up 🐥!<br> — Mindfuel Team ^_^ </p>
                 </body>
                 </html>
@@ -207,7 +208,9 @@ def weekly_send_email(server, port, sender_email, sender_password):
                         <blockquote style="border-left: 4px solid #919191; padding-left: 10px;">
                             {quote}
                         </blockquote>
+                         <p>It's Day 365/365.<br> You made it to the last day of the year.<br> Happy for you , Yayy! 🥳🥳🥳 </p.
                         <p>Stay Cheesed Up 🐥!<br> — Mindfuel Team ^_^ </p>
+                        
                     </body>
                     </html>
                 """
@@ -233,11 +236,10 @@ def weekly_send_email(server, port, sender_email, sender_password):
 
 def main():
 
-    today = datetime.today() #Fetching today's date
-    weekday = today.weekday() #Fetching weekdays
+
 
     daily_send_email("smtp.gmail.com", 587, os.getenv("SENDER_EMAIL"), os.getenv("SENDER_PASSWORD")) #send emails daily
 
-    if weekday == 0: #if weekday() is Monday; Send mails to weekly users
-         weekly_send_email("smtp.gmail.com", 587, os.getenv("SENDER_EMAIL"), os.getenv("SENDER_PASSWORD"))
+
+    weekly_send_email("smtp.gmail.com", 587, os.getenv("SENDER_EMAIL"), os.getenv("SENDER_PASSWORD"))
 main()
