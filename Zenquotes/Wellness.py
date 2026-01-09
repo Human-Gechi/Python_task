@@ -129,8 +129,7 @@ def daily_send_email(server, port, sender_email, sender_password):
                     <blockquote style="border-left: 4px solid #919191; padding-left: 10px;">
                         {quote}
                     </blockquote>
-                    <p>It's a New year ❤️.</p>
-                    <p>Stay Cheesed Up 🐥!<br> — Mindfuel Team ^_^ </p>
+                    <p>Stay Positive🐥!<br> — Mindfuel Team ^_^ </p>
                 </body>
                 </html>
                 """
@@ -208,8 +207,7 @@ def weekly_send_email(server, port, sender_email, sender_password):
                         <blockquote style="border-left: 4px solid #919191; padding-left: 10px;">
                             {quote}
                         </blockquote>
-                         <p>It's a New year ❤️. </p.
-                        <p>Stay Cheesed Up 🐥!<br> — Mindfuel Team ^_^ </p>
+                        <p>Stay Positive🐥!<br> — Mindfuel Team ^_^ </p>
                         
                     </body>
                     </html>
